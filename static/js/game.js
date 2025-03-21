@@ -66,17 +66,97 @@ document.addEventListener('DOMContentLoaded', function() {
         // 清空棋盘
         board.innerHTML = '';
         
-        // 创建14x14的棋盘格
-        for (let row = 0; row < 14; row++) {
-            for (let col = 0; col < 14; col++) {
-                const cell = document.createElement('div');
-                cell.classList.add('cell');
-                cell.dataset.row = row;
-                cell.dataset.col = col;
-                cell.addEventListener('click', () => handleCellClick(row, col));
-                board.appendChild(cell);
+        const boardSize = 15; // 修改为15x15的棋盘，实际为14x14的格子
+        
+        // 获取棋盘样式
+        const boardStyle = getComputedStyle(board);
+        const paddingSize = parseFloat(boardStyle.padding);
+        
+        // 获取棋盘内部尺寸（不包含内边距）
+        const boardInnerWidth = board.clientWidth - paddingSize * 2;
+        const boardInnerHeight = board.clientHeight - paddingSize * 2;
+        
+        // 确保所有单元格都是正方形
+        const cellSize = Math.min(boardInnerWidth, boardInnerHeight) / (boardSize - 1);
+        
+        // 计算实际的网格区域的宽度和高度
+        const gridWidth = cellSize * (boardSize - 1);
+        const gridHeight = cellSize * (boardSize - 1);
+        
+        // 计算水平和垂直方向上的总内边距
+        const totalHorizontalPadding = boardInnerWidth - gridWidth;
+        const totalVerticalPadding = boardInnerHeight - gridHeight;
+        
+        // 计算左、右、上、下四个方向的内边距
+        const leftPadding = (totalHorizontalPadding / 2) + paddingSize;
+        const topPadding = (totalVerticalPadding / 2) + paddingSize;
+        
+        // 创建水平线
+        for (let i = 0; i < boardSize; i++) {
+            const horizontalLine = document.createElement('div');
+            horizontalLine.classList.add('grid-line', 'horizontal-line');
+            horizontalLine.style.top = `${topPadding + i * cellSize}px`;
+            horizontalLine.style.left = `${leftPadding}px`;
+            horizontalLine.style.width = `${gridWidth}px`;
+            board.appendChild(horizontalLine);
+        }
+        
+        // 创建垂直线
+        for (let i = 0; i < boardSize; i++) {
+            const verticalLine = document.createElement('div');
+            verticalLine.classList.add('grid-line', 'vertical-line');
+            verticalLine.style.left = `${leftPadding + i * cellSize}px`;
+            verticalLine.style.top = `${topPadding}px`;
+            verticalLine.style.height = `${gridHeight}px`;
+            board.appendChild(verticalLine);
+        }
+        
+        // 添加五星定位点
+        const starPoints = [
+            {x: 3, y: 3}, {x: 3, y: 11}, 
+            {x: 11, y: 3}, {x: 11, y: 11}, 
+            {x: 7, y: 7}
+        ];
+        
+        for (const point of starPoints) {
+            const starPoint = document.createElement('div');
+            starPoint.classList.add('star-point');
+            starPoint.style.left = `${leftPadding + point.x * cellSize}px`;
+            starPoint.style.top = `${topPadding + point.y * cellSize}px`;
+            board.appendChild(starPoint);
+        }
+        
+        // 创建交叉点的可点击区域
+        for (let row = 0; row < boardSize; row++) {
+            for (let col = 0; col < boardSize; col++) {
+                const clickArea = document.createElement('div');
+                clickArea.classList.add('click-area');
+                clickArea.style.left = `${leftPadding + col * cellSize}px`;
+                clickArea.style.top = `${topPadding + row * cellSize}px`;
+                clickArea.dataset.row = row;
+                clickArea.dataset.col = col;
+                clickArea.addEventListener('click', () => handleCellClick(row, col));
+                board.appendChild(clickArea);
             }
         }
+        
+        // 添加边框辅助元素以确保均匀的内边距
+        const borderGuides = document.querySelectorAll('.border-guide');
+        borderGuides.forEach(guide => guide.remove());
+        
+        const rightBorder = document.createElement('div');
+        rightBorder.classList.add('grid-line', 'vertical-line', 'border-guide');
+        rightBorder.style.left = `${leftPadding + (boardSize - 1) * cellSize}px`;
+        rightBorder.style.top = `${topPadding}px`;
+        rightBorder.style.height = `${gridHeight}px`;
+        board.appendChild(rightBorder);
+        
+        const bottomBorder = document.createElement('div');
+        bottomBorder.classList.add('grid-line', 'horizontal-line', 'border-guide');
+        bottomBorder.style.top = `${topPadding + (boardSize - 1) * cellSize}px`;
+        bottomBorder.style.left = `${leftPadding}px`;
+        bottomBorder.style.width = `${gridWidth}px`;
+        board.appendChild(bottomBorder);
     }
     
     // 处理单元格点击
@@ -287,34 +367,62 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // 渲染棋盘
     function renderBoard() {
-        // 获取所有单元格
-        const cells = document.querySelectorAll('.cell');
+        // 移除所有棋子
+        const existingPieces = document.querySelectorAll('.piece');
+        existingPieces.forEach(piece => piece.remove());
         
-        // 清除所有棋子
-        cells.forEach(cell => {
-            cell.innerHTML = '';
-        });
+        const boardSize = 15;
+        
+        // 获取棋盘样式
+        const boardStyle = getComputedStyle(board);
+        const paddingSize = parseFloat(boardStyle.padding);
+        
+        // 获取棋盘内部尺寸（不包含内边距）
+        const boardInnerWidth = board.clientWidth - paddingSize * 2;
+        const boardInnerHeight = board.clientHeight - paddingSize * 2;
+        
+        // 确保所有单元格都是正方形
+        const cellSize = Math.min(boardInnerWidth, boardInnerHeight) / (boardSize - 1);
+        
+        // 计算实际的网格区域的宽度和高度
+        const gridWidth = cellSize * (boardSize - 1);
+        const gridHeight = cellSize * (boardSize - 1);
+        
+        // 计算水平和垂直方向上的总内边距
+        const totalHorizontalPadding = boardInnerWidth - gridWidth;
+        const totalVerticalPadding = boardInnerHeight - gridHeight;
+        
+        // 计算左、右、上、下四个方向的内边距
+        const leftPadding = (totalHorizontalPadding / 2) + paddingSize;
+        const topPadding = (totalVerticalPadding / 2) + paddingSize;
         
         // 根据游戏状态放置棋子
-        for (let row = 0; row < 14; row++) {
-            for (let col = 0; col < 14; col++) {
-                if (gameBoard[row][col]) {
-                    const cellIndex = row * 14 + col;
-                    const cell = cells[cellIndex];
-                    
+        for (let row = 0; row < boardSize; row++) {
+            for (let col = 0; col < boardSize; col++) {
+                if (row < gameBoard.length && col < gameBoard[row].length && gameBoard[row][col]) {
                     const piece = document.createElement('div');
                     piece.classList.add('piece', gameBoard[row][col]);
+                    
+                    // 设置棋子位置在交叉点上
+                    piece.style.left = `${leftPadding + col * cellSize}px`;
+                    piece.style.top = `${topPadding + row * cellSize}px`;
                     
                     // 如果是最后一步棋，添加特殊标记
                     if (lastMove && lastMove.row === row && lastMove.col === col) {
                         piece.classList.add('last-move');
                     }
                     
-                    cell.appendChild(piece);
+                    board.appendChild(piece);
                 }
             }
         }
     }
+    
+    // 窗口大小变化时重新绘制棋盘
+    window.addEventListener('resize', function() {
+        initializeBoard();
+        renderBoard();
+    });
     
     // 创建烟花效果
     function createFireworks() {
