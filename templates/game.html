@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>五子棋 - 游戏</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fingerprintjs2@2.1.4/dist/fingerprint2.min.js"></script>
+</head>
+<body>
+    <div class="container game-container">
+        <div class="game-header">
+            <div class="room-info">房间号: <span id="roomId">{{ room_id }}</span></div>
+            <div id="gameStatus" class="game-status">等待对手加入...</div>
+        </div>
+        
+        <div class="board-container">
+            <div id="gameWinner" class="game-winner-overlay hidden">
+                <div class="winner-message">
+                    <h2>游戏结束</h2>
+                    <p id="winnerText"></p>
+                    <button id="restartBtn" class="btn">再来一局</button>
+                </div>
+            </div>
+            
+            <div id="board" class="board"></div>
+        </div>
+        
+        <div class="game-controls">
+            <button id="undoBtn" class="btn" disabled>悔棋</button>
+        </div>
+    </div>
+    
+    <!-- 悔棋请求弹窗 -->
+    <div id="undoRequestModal" class="modal hidden">
+        <div class="modal-content">
+            <h3>悔棋请求</h3>
+            <p>对手请求悔棋，是否同意？</p>
+            <div class="modal-buttons">
+                <button id="acceptUndoBtn" class="btn">同意</button>
+                <button id="rejectUndoBtn" class="btn">拒绝</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/game.js') }}"></script>
+</body>
+</html> 
